@@ -60,7 +60,7 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>com.example.clap.App</mainClass>
+                            <mainClass>com.example.clap.App01Invoke</mainClass>
                             <id>app</id>
                         </program>
                     </programs>

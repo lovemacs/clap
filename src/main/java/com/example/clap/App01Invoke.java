@@ -3,7 +3,7 @@ package com.example.clap;
 import clojure.lang.RT;
 
 // 使用java调用clojure函数
-public class App {
+public class App01Invoke {
     private static final String MAINCLJ = "com/example/clap.clj";
 
     public static void main(String[] args){

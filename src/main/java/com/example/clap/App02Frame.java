@@ -10,7 +10,7 @@ import java.awt.*;
  * Time: 下午4:56
  * To change this template use File | Settings | File Templates.
  */
-public class App02 {
+public class App02Frame {
 
   public static void main(String[] args) {
     JFrame frame = new JFrame("app02");
