@@ -43,26 +43,61 @@
 (defn paint-snake [g snake] (doseq [point (snake :body)] (fill-point g point (snake :color))))
 
 
+(defn add-points [ pt] (map + pt [10 0]))
+;;;test
+(def value1 (add-points [1 1]))
+(println "value1" value1)
+
+(defn move-snake-body [snake]
+  (assoc snake :body (cons (add-points (first (snake :body))) (butlast (snake :body)))))
+
+(defn move-snake  [snake]
+  ; (def snake (assoc snake :body (cons (add-points (first (snake :body))) (butlast (snake :body))))) ; not work
+  (dosync (alter snake move-snake-body))  ;
+  (println "snake = " snake)
+  )
+
+;;; test
+(def asnake (create-snake))
+(println "asnake = " asnake)
+(def value2 (add-points (first (asnake :body))))
+(println "value2 = " value2)
+
+
+
+
+
 
 ;;;
 (defn game-Panel [apple snake]
-  (proxy [JPanel] []
+  (proxy [JPanel ActionListener] []
     (paintComponent [g]
       (proxy-super paintComponent g)
       (paint-apple g apple)
       (paint-snake g snake)
       )
+    (actionPerformed [e]
+      (move-snake snake)
+
+
+      (.repaint this)
+      )
     )
   )
 
 (defn game []
-  (let [ apple (create-apple)
-         snake (create-snake)
-         frame (JFrame. "snake & apple")
-         panel (game-Panel apple snake)]
-    (doto panel (.setPreferredSize (Dimension. width height)))
-    (doto frame (.add panel) (.pack) (.setVisible true))
+  (let [apple (create-apple)
+        snake (ref (create-snake))
+        frame (JFrame. "snake & apple")
+        panel (game-Panel apple snake)
+        timer (Timer. 75 panel)
+        ]
 
+    (doto panel (.setPreferredSize (Dimension. width height)))
+    (doto frame (.add panel) (.pack)
+                (.setVisible true)
+                )
+    (doto timer (.start))
     ;[frame panel textArea]
     )
   )
