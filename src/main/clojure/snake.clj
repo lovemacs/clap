@@ -40,10 +40,10 @@
 
 ;(def image (ImageIO/read (File. "examples/clojure-icon.gif")))
 
-(defn fill-point-apple [g location color panel]
-  (.setColor g color)
-  (.fillRect g (* 10 (first location)) (* 10 (second location)) 10 10)
-  ; (.drawImage g (ImageIO/read (as-file "examples/clojure-icon.gif")) (* 10 (first location)) (* 10 (second location))  panel )
+(defn fill-point-apple [g location color image panel]
+  ;(.setColor g color)
+  ;(.fillRect g (* 10 (first location)) (* 10 (second location)) 10 10)
+  (.drawImage g image (* 10 (first location)) (* 10 (second location)), 15, 15,  panel )
   )
 
 
@@ -54,9 +54,11 @@
 (defn create-apple [] {
                         :color    (Color. 255 0 0)
                         :type     :apple
-                        :location [(rand-int width) (rand-int height)]})
+                        :location [(rand-int width) (rand-int height)]
+                        :image (ImageIO/read (as-file "examples/clojure-icon.gif"))
+                        })
 
-(defn paint-apple [g apple panel] (fill-point-apple g (apple :location) (apple :color) panel))
+(defn paint-apple [g apple panel] (fill-point-apple g (apple :location) (apple :color) (apple :image) panel))
 
 (defn create-snake [] {
                         :color (Color. 0 255 0)
