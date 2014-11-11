@@ -49,7 +49,10 @@
 
 (defn fill-point [g location color]
   (.setColor g color)
-  (.fillRect g (* 10 (first location)) (* 10 (second location)) 10 10))
+  (.fillRect g (* 10 (first location)) (* 10 (second location)) 10 10)
+  (.setColor g (Color. 0 0 255))
+  (.drawRect g (* 10 (first location)) (* 10 (second location)) 10 10)
+  )
 
 (defn create-apple [] {
                         :color    (Color. 255 0 0)
