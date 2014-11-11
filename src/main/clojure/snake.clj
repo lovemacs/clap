@@ -2,13 +2,18 @@
   (:import (java.awt.event ActionListener)
            (javax.swing JTextArea JScrollPane)
            (java.awt GridLayout))
-  (:import (java.util Date Calendar)
+  (:import  java.io.File
+            javax.imageio.ImageIO
+           (java.util Date Calendar)
            (java.net URI ServerSocket)
-           java.sql.DriverManager
+            java.sql.DriverManager
            (java.awt Color Dimension)
            (javax.swing JPanel JFrame Timer JOptionPane)
            (java.awt.event ActionListener KeyListener))
-  (:use examples.import-static))
+  (:use examples.import-static)
+  (:use clojure.java.io)
+  )
+
 
 (import-static java.awt.event.KeyEvent VK_LEFT VK_RIGHT VK_UP VK_DOWN) ; 左右上下
 
@@ -33,17 +38,25 @@
             VK_UP    [0 -1]
             VK_DOWN  [0 1]})
 
+;(def image (ImageIO/read (File. "examples/clojure-icon.gif")))
+
+(defn fill-point-apple [g location color panel]
+  (.setColor g color)
+  (.fillRect g (* 10 (first location)) (* 10 (second location)) 10 10)
+  ; (.drawImage g (ImageIO/read (as-file "examples/clojure-icon.gif")) (* 10 (first location)) (* 10 (second location))  panel )
+  )
+
+
 (defn fill-point [g location color]
   (.setColor g color)
   (.fillRect g (* 10 (first location)) (* 10 (second location)) 10 10))
-
 
 (defn create-apple [] {
                         :color    (Color. 255 0 0)
                         :type     :apple
                         :location [(rand-int width) (rand-int height)]})
 
-(defn paint-apple [g apple] (fill-point g (apple :location) (apple :color)))
+(defn paint-apple [g apple panel] (fill-point-apple g (apple :location) (apple :color) panel))
 
 (defn create-snake [] {
                         :color (Color. 0 255 0)
@@ -92,17 +105,28 @@
   )
 
 
+
+(defn head-overlaps-body?  [{[head & body] :body}]
+  (contains? (set body) head))
+(def lose? head-overlaps-body?)
+
+
+(defn  reset-game [snake apple]
+  ( dosync
+      (ref-set apple (create-apple))
+      (ref-set snake (create-snake))
+    ))
 ;;;------------------------------
 ;;; gui
 ;;;------------------------------
 
 ;;;
-(defn game-Panel [apple snake]
+(defn game-Panel [apple snake frame]
   (proxy [JPanel ActionListener KeyListener] []
 
     (paintComponent [g]                                     ; 重写JPanel的方法: protected void printComponent(Graphics g)
       (proxy-super paintComponent g)
-      (paint-apple g apple)
+      (paint-apple g apple this)
       (paint-snake g snake))
 
     (actionPerformed [e]
@@ -115,10 +139,14 @@
             (let [x (alter snake move :grow)] (println "eats? true: grow" (x :body)))
             )
           (let [x (alter snake move)] (println "eats? false:" (x :body)))
-
           )
         )
-      (.repaint this))
+      (when (lose? @snake)
+        (reset-game snake apple)
+        (JOptionPane/showMessageDialog frame "You lose :(")
+        )
+      (.repaint this)
+      )
 
     (keyPressed [e]                                         ;按下键盘事件
       ;(println "key pressed _ _ _" (.getKeyCode e))
@@ -140,7 +168,7 @@
   (let [apple (ref (create-apple))                          ;定义苹果
         snake (ref (create-snake))                          ;定义蛇
         frame (JFrame. "snake & apple")
-        panel (game-Panel apple snake)
+        panel (game-Panel apple snake frame)
         timer (Timer. 75 panel)                             ; 每隔75毫秒触发panel的actionPerformed方法
         ]
 
